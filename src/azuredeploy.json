@@ -1,11 +1,12 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.3.0.0",
+  "contentVersion": "1.4.0.0",
   "parameters": {
-    "storageName": {
+    "environment": {
       "type": "string",
       "minLength": 3,
-      "maxLength": 24
+      "maxLength": 5,
+      "defaultValue": "dev"
     },
     "storageSKU": {
       "type": "string",
@@ -27,14 +28,18 @@
     }
   },
   "functions": [],
-  "variables": {},
+  "variables": {
+    "storageName": "[concat(parameters('environment'), 'storage', uniqueString(resourceGroup().id))]"
+  },
   "resources": [
     {
-      "name": "[parameters('storageName')]",
+      "name": "[variables('storageName')]",
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
       "tags": {
-        "displayName": "[parameters('storageName')]"
+        "displayName": "[variables('storageName')]",
+        "kind": "storage",
+        "environment": "[parameters('environment')]"
       },
       "location": "[parameters('location')]",
       "kind": "StorageV2",
