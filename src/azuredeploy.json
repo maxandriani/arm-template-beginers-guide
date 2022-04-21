@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.5.0.0",
+  "contentVersion": "1.7.0.0",
   "parameters": {
     "environment": {
       "type": "string",
@@ -29,7 +29,8 @@
   },
   "functions": [],
   "variables": {
-    "storageName": "[concat(parameters('environment'), 'storage', uniqueString(resourceGroup().id))]"
+    "storageName": "[concat(parameters('environment'), 'storage', uniqueString(resourceGroup().id))]",
+    "servicePlanName": "[concat(parameters('environment'), '-plan-', uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
@@ -48,6 +49,26 @@
       },
       "properties": {
         "supportsHttpsTrafficOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-12-01",
+      "name": "[variables('servicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "B1",
+        "tier": "Basic",
+        "size": "B1",
+        "family": "B",
+        "capacity": 1
+      },
+      "kind": "linux",
+      "properties": {
+        "perSiteScaling": false,
+        "reserved": true,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0
       }
     }
   ],
