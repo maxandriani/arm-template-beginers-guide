@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.7.0.0",
+  "contentVersion": "1.8.0.0",
   "parameters": {
     "environment": {
       "type": "string",
@@ -25,12 +25,20 @@
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]"
+    },
+    "linuxFxVersion": {
+      "type": "string",
+      "defaultValue": "php|7.0",
+      "metadata": {
+        "description": "The Runtime stack of current web app"
+      }
     }
   },
   "functions": [],
   "variables": {
     "storageName": "[concat(parameters('environment'), 'storage', uniqueString(resourceGroup().id))]",
-    "servicePlanName": "[concat(parameters('environment'), '-plan-', uniqueString(resourceGroup().id))]"
+    "servicePlanName": "[concat(parameters('environment'), '-webappplan')]",
+    "webAppName": "[concat(parameters('environment'), '-app-', uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
@@ -69,6 +77,22 @@
         "reserved": true,
         "targetWorkerCount": 0,
         "targetWorkerSizeId": 0
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2020-12-01",
+      "name": "[variables('webAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]"
+      ],
+      "kind": "app",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "[parameters('linuxFxVersion')]"
+        }
       }
     }
   ],
